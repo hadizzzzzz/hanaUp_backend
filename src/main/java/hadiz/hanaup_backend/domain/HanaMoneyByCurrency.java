@@ -16,7 +16,7 @@ public class HanaMoneyByCurrency {
     private Double balance;
     private LocalDateTime lastUpdated;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 

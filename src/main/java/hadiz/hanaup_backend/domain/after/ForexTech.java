@@ -16,11 +16,11 @@ public class ForexTech {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long forexTechID;  // 환테크 ID (Primary Key)
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;  // 사용자 ID (Foreign Key)
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hana_money_id", nullable = false)
     private HanaMoneyByCurrency hanaMoney;  // 하나머니 ID (Foreign Key)
 

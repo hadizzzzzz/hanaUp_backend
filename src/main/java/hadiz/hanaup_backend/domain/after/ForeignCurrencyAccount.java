@@ -20,7 +20,7 @@ public class ForeignCurrencyAccount {
     private LocalDateTime creationDate;
     private LocalDateTime expirationDate;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
