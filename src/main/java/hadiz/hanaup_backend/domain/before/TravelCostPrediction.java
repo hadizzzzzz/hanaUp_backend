@@ -14,9 +14,9 @@ public class TravelCostPrediction {
     private String country;
     private int travelDuration;
     private String travelType;
-    private Double predictedAmount;
+    private double predictedAmount;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "test_id")
     private TravelSpendingTest travelSpendingTest;
 

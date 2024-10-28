@@ -1,5 +1,6 @@
 package hadiz.hanaup_backend.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import hadiz.hanaup_backend.domain.after.ForeignCurrencyAccount;
 import hadiz.hanaup_backend.domain.before.PastTravelCostPrediction;
 import hadiz.hanaup_backend.domain.before.TravelSpendingTest;
@@ -22,18 +23,23 @@ public class User {
     private String email;
     private String name;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<TravelLog> travelLogs = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<TravelSpendingTest> spendingTests = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<PastTravelCostPrediction> pastPredictions = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<ForeignCurrencyAccount> foreignCurrencyAccounts = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<HanaMoneyByCurrency> hanaMoneyByCurrencies = new ArrayList<>();
 }

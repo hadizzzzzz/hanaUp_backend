@@ -17,7 +17,7 @@ public class ForeignCurrencyDetails {
     private Double interestRate;
     private LocalDateTime lastUpdated;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id")
     private ForeignCurrencyAccount foreignCurrencyAccount;
 

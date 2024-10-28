@@ -20,11 +20,11 @@ public class DailyExpenseReport {
     private Double totalSpent;
     private Double savedFees;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "travel_log_id")
     private TravelLog travelLog;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 

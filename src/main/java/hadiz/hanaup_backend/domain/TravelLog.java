@@ -10,6 +10,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "travel_log")
+@Getter @Setter
 public class TravelLog {
 
     @Id
@@ -18,15 +19,17 @@ public class TravelLog {
 
     private LocalDateTime startDate;
     private LocalDateTime endDate;
+    private int duration;
     private String destination;
     private Double totalSpent;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
     @OneToMany(mappedBy = "travelLog", cascade = CascadeType.ALL)
     private List<DailyExpenseReport> dailyReports = new ArrayList<>();
+
 
     // Getters and Setters
 }
