@@ -26,8 +26,9 @@ public class ForexTech {
 
     private Double targetExchangeRate;  // 목표 환율
     private Double currentExchangeRate;  // 현재 환율
-    private Boolean autoRechargeEnabled;  // 자동 충전 여부
 
+    private String currencyID;
+    private Double Balance;
 
-
+    private boolean isActive; // 계좌 활성 상태
 }

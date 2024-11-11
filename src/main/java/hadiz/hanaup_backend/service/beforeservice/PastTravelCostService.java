@@ -2,16 +2,14 @@ package hadiz.hanaup_backend.service.beforeservice;
 
 import hadiz.hanaup_backend.domain.TravelLog;
 import hadiz.hanaup_backend.domain.before.PastTravelCostPrediction;
-import hadiz.hanaup_backend.repository.PastTravelCostPredictionRepository;
+import hadiz.hanaup_backend.repository.before.PastTravelCostPredictionRepository;
 import hadiz.hanaup_backend.repository.TravelLogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.converter.json.GsonBuilderUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional

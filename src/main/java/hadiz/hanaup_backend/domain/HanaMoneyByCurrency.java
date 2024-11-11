@@ -14,7 +14,7 @@ public class HanaMoneyByCurrency {
 
     private String currencyID;
     private Double balance;
-    private LocalDateTime lastUpdated;
+    private Double buyexchangerate; //구매한 환율 (과거 환율, 10일 전 데이터?)
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
