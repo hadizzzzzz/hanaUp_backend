@@ -1,32 +1,41 @@
 package hadiz.hanaup_backend.domain.after;
 
+import hadiz.hanaup_backend.domain.HanaMoneyByCurrency;
 import hadiz.hanaup_backend.domain.User;
-import hadiz.hanaup_backend.domain.after.ForeignCurrencyDetails;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "foreign_currency_account")
+@Getter @Setter
 public class ForeignCurrencyAccount {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long accountID;
 
-    private String accountNumber;
-    private LocalDateTime creationDate;
-    private LocalDateTime expirationDate;
+    private LocalDate expirationDate = LocalDate.of(2024, 12, 31);
+    private int period;
+    private boolean isActive; // 계좌 활성 상태
+
+    private String currencyID;
+    private String country;
+    private Double firstBalance;
+    private BigDecimal interest;
+    private BigDecimal lastBalance;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(mappedBy = "foreignCurrencyAccount", cascade = CascadeType.ALL)
-    private List<ForeignCurrencyDetails> foreignCurrencyDetailsList = new ArrayList<>();
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hana_money_id", nullable = false)
+    private HanaMoneyByCurrency hanaMoney;  // 하나머니 ID (Foreign Key)
 
-    // Getters and Setters
+    // '미국'은 객체를 하나 미리 생성해서 박아두기
 }
 

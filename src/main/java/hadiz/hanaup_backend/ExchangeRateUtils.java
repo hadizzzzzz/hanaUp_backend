@@ -4,27 +4,20 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import javax.net.ssl.*;
+import java.io.IOException;
 import java.math.BigDecimal;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.security.cert.X509Certificate;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 // 지원되는 통화 리스트
-// 환테크 : 일본, 태국, 말레이시아, 대만(42.2), 홍콩
+// 환테크 : 일본, 태국, 말레이시아, 대만(42.2), 호주
 // 적금 : 미국, 영국, 중국, 필리핀(23.7), 유럽
 public class ExchangeRateUtils {
 
@@ -37,20 +30,18 @@ public class ExchangeRateUtils {
 
     public static void disableSslVerification() {
         try {
-            TrustManager[] trustAllCerts = new TrustManager[]{
-                    new X509TrustManager() {
-                        public X509Certificate[] getAcceptedIssuers() { return null; }
-                        public void checkClientTrusted(X509Certificate[] certs, String authType) {}
-                        public void checkServerTrusted(X509Certificate[] certs, String authType) {}
-                    }
-            };
+            final SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(null, new TrustManager[]{new X509TrustManager() {
+                public X509Certificate[] getAcceptedIssuers() {
+                    return new X509Certificate[0];
+                }
+                public void checkClientTrusted(X509Certificate[] certs, String authType) {}
+                public void checkServerTrusted(X509Certificate[] certs, String authType) {}
+            }}, new java.security.SecureRandom());
 
-            SSLContext sc = SSLContext.getInstance("SSL");
-            sc.init(null, trustAllCerts, new java.security.SecureRandom());
-            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
 
-            HostnameVerifier allHostsValid = (hostname, session) -> true;
-            HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+            HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -66,49 +57,56 @@ public class ExchangeRateUtils {
         supportedCurrencies.put("THB", "태국 바트");
         supportedCurrencies.put("MYR", "말레이시아 링기트");
         supportedCurrencies.put("HKD", "홍콩 달러");
+        supportedCurrencies.put("AUD", "호주 달러");
         return supportedCurrencies;
     }
 
-    public static Map<String, BigDecimal> getExchangeRates() {
+    public static Map<String, BigDecimal> getExchangeRates(String searchDate) {
         Map<String, BigDecimal> exchangeRates = new HashMap<>();
-        String authKey = "JlWTMTHWCMWHw3CA1Bg39ShrNIJFMSK5";
-        String searchDate = new SimpleDateFormat("yyyyMMdd").format(new Date());
+        String authKey = "jua2NsoiCMwJ09HSaRv2EbtFtL2uNOhL";
         String dataType = "AP01";
         String urlString = String.format(
                 "https://www.koreaexim.go.kr/site/program/financial/exchangeJSON?authkey=%s&searchdate=%s&data=%s",
                 authKey, searchDate, dataType);
 
+        HttpClient client = HttpClient.newBuilder().build();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(urlString))
+                .GET()
+                .build();
+
         try {
-            URL url = new URL(urlString);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setConnectTimeout(5000);
-            connection.setReadTimeout(5000);
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            int responseCode = response.statusCode();
+            System.out.println("Response Code: " + responseCode);
+            if (responseCode == 200) {
+                String responseBody = response.body();
+                System.out.println("Response: " + responseBody);
 
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(
-                    connection.getResponseCode() > 299 ? connection.getErrorStream() : connection.getInputStream()))) {
-
-                String line;
                 JSONParser parser = new JSONParser();
-                while ((line = reader.readLine()) != null) {
-                    JSONArray exchangeRateInfoList = (JSONArray) parser.parse(line);
-                    for (Object o : exchangeRateInfoList) {
-                        JSONObject exchangeRateInfo = (JSONObject) o;
-                        String currencyCode = (String) exchangeRateInfo.get("cur_unit");
+                JSONArray exchangeRateInfoList = (JSONArray) parser.parse(responseBody);
+                for (Object o : exchangeRateInfoList) {
+                    JSONObject exchangeRateInfo = (JSONObject) o;
+                    String currencyCode = (String) exchangeRateInfo.get("cur_unit");
 
-                        // 지원되는 통화인지 확인 후 환율 추가
-                        if (getSupportedCurrencies().containsKey(currencyCode)) {
+                    if (getSupportedCurrencies().containsKey(currencyCode)) {
+                        try {
                             BigDecimal rate = parseRate(exchangeRateInfo);
-                            exchangeRates.put(currencyCode, rate);
+                            // 소수점 둘째 자리로 제한
+                            BigDecimal roundedRate = rate.setScale(2, BigDecimal.ROUND_HALF_UP);
+                            exchangeRates.put(currencyCode, roundedRate);
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
                     }
                 }
+            } else {
+                System.err.println("Error response code: " + responseCode);
             }
-        } catch (Exception e) {
+        } catch (IOException | InterruptedException | org.json.simple.parser.ParseException e) {
             e.printStackTrace();
         }
 
-        // 지원되지 않는 통화에 대해 기본 환율 설정
         for (String currencyCode : getSupportedCurrencies().keySet()) {
             exchangeRates.putIfAbsent(currencyCode, DEFAULT_EXCHANGE_RATE);
         }
@@ -116,8 +114,84 @@ public class ExchangeRateUtils {
         return exchangeRates;
     }
 
-    private static BigDecimal parseRate(JSONObject exchangeRateInfo) throws Exception {
-        NumberFormat format = NumberFormat.getInstance(Locale.getDefault());
-        return new BigDecimal(format.parse(exchangeRateInfo.get("deal_bas_r").toString()).doubleValue());
+
+    private static BigDecimal parseRate(JSONObject exchangeRateInfo) {
+        try {
+            NumberFormat format = NumberFormat.getInstance(Locale.getDefault());
+            return new BigDecimal(format.parse(exchangeRateInfo.get("deal_bas_r").toString()).doubleValue());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return DEFAULT_EXCHANGE_RATE; // 예외 발생 시 기본 환율 반환
+        }
+    }
+
+    // 2024년 11월부터 현재까지 1주 간격으로 월화수목금 환율 가져오기
+    public static Map<String, Map<String, BigDecimal>> getWeeklyExchangeRates() {
+        Map<String, Map<String, BigDecimal>> weeklyExchangeRates = new LinkedHashMap<>();
+        Calendar startDate = new GregorianCalendar(2024, Calendar.NOVEMBER, 1);
+        Calendar endDate = Calendar.getInstance();  // 현재 날짜
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+
+        // 시작 날짜를 월요일로 설정
+        while (startDate.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
+            startDate.add(Calendar.DAY_OF_YEAR, 1);
+        }
+
+        HttpClient client = HttpClient.newBuilder().build();
+
+        while (startDate.before(endDate)) {
+            String weekStartDate = dateFormat.format(startDate.getTime());
+            Map<String, BigDecimal> exchangeRatesForWeek = new HashMap<>();
+
+            for (int i = 0; i < 5; i++) { // 월요일부터 금요일까지
+                String formattedDate = dateFormat.format(startDate.getTime());
+                String dataType = "AP01";
+                String urlString = String.format(
+                        "https://www.koreaexim.go.kr/site/program/financial/exchangeJSON?authkey=%s&searchdate=%s&data=%s",
+                        "jua2NsoiCMwJ09HSaRv2EbtFtL2uNOhL", formattedDate, dataType);
+
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(urlString))
+                        .GET()
+                        .build();
+
+                try {
+                    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+                    if (response.statusCode() == 200) {
+                        String responseBody = response.body();
+                        JSONParser parser = new JSONParser();
+                        JSONArray exchangeRateInfoList = (JSONArray) parser.parse(responseBody);
+                        for (Object o : exchangeRateInfoList) {
+                            JSONObject exchangeRateInfo = (JSONObject) o;
+                            String currencyCode = (String) exchangeRateInfo.get("cur_unit");
+
+                            if (getSupportedCurrencies().containsKey(currencyCode)) {
+                                try {
+                                    BigDecimal rate = parseRate(exchangeRateInfo);
+                                    // 소수점 둘째 자리로 제한
+                                    BigDecimal roundedRate = rate.setScale(2, BigDecimal.ROUND_HALF_UP);
+                                    exchangeRatesForWeek.put(currencyCode + "_" + formattedDate, roundedRate); // 날짜와 함께 저장
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    } else {
+                        System.err.println("Error response code: " + response.statusCode());
+                    }
+                } catch (IOException | InterruptedException | org.json.simple.parser.ParseException e) {
+                    e.printStackTrace();
+                }
+
+                // 다음 날로 이동
+                startDate.add(Calendar.DAY_OF_YEAR, 1);
+            }
+
+            // 주별 환율 저장 (월요일 날짜를 키로 사용)
+            weeklyExchangeRates.put(weekStartDate, exchangeRatesForWeek);
+        }
+
+        return weeklyExchangeRates;
     }
 }

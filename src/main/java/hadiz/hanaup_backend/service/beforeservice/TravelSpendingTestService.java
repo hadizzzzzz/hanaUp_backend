@@ -18,8 +18,8 @@ public class TravelSpendingTestService {
         TravelSpendingTest test = new TravelSpendingTest();
 
         int eScore = 0, iScore = 0;
-        int sScore = 0, nScore = 0;
-        int tScore = 0, fScore = 0;
+        int fScore = 0, tScore = 0;
+        int meScore = 0, phScore = 0;
         int jScore = 0, pScore = 0;
 
         for (AnswerDTO answer : answers) {
@@ -28,13 +28,13 @@ public class TravelSpendingTestService {
                     if (answer.getScore() > 0) eScore += answer.getScore();
                     else iScore -= answer.getScore();
                     break;
-                case "S/N":
-                    if (answer.getScore() > 0) sScore += answer.getScore();
-                    else nScore -= answer.getScore();
+                case "F/T":
+                    if (answer.getScore() > 0) fScore += answer.getScore();
+                    else tScore -= answer.getScore();
                     break;
-                case "T/F":
-                    if (answer.getScore() > 0) tScore += answer.getScore();
-                    else fScore -= answer.getScore();
+                case "ME/PH":
+                    if (answer.getScore() > 0) meScore += answer.getScore();
+                    else phScore -= answer.getScore();
                     break;
                 case "J/P":
                     if (answer.getScore() > 0) jScore += answer.getScore();
@@ -45,8 +45,8 @@ public class TravelSpendingTestService {
 
         StringBuilder mbtiResult = new StringBuilder();
         mbtiResult.append(eScore >= iScore ? "E" : "I");
-        mbtiResult.append(sScore >= nScore ? "S" : "N");
-        mbtiResult.append(tScore >= fScore ? "T" : "F");
+        mbtiResult.append(fScore >= tScore ? "F" : "T");
+        mbtiResult.append(meScore >= phScore ? "ME" : "PH");
         mbtiResult.append(jScore >= pScore ? "J" : "P");
 
         return mbtiResult.toString();

@@ -3,7 +3,7 @@ package hadiz.hanaup_backend.service.beforeservice;
 import hadiz.hanaup_backend.domain.TravelLog;
 import hadiz.hanaup_backend.domain.User;
 import hadiz.hanaup_backend.domain.before.PastTravelCostPrediction;
-import hadiz.hanaup_backend.repository.PastTravelCostPredictionRepository;
+import hadiz.hanaup_backend.repository.before.PastTravelCostPredictionRepository;
 import hadiz.hanaup_backend.repository.TravelLogRepository;
 import hadiz.hanaup_backend.repository.UserRepository;
 import jakarta.persistence.EntityManager;
@@ -49,6 +49,7 @@ class PastTravelCostServiceTest {
         // 유저 설정
         User user = new User();
         user.setName("Test User");
+        //user.setUserID(1L);
         userRepository.save(user);
 
         // TravelLog 설정 (과거여행)

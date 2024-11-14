@@ -1,4 +1,4 @@
-package hadiz.hanaup_backend.repository;
+package hadiz.hanaup_backend.repository.before;
 
 import hadiz.hanaup_backend.domain.before.PastTravelCostPrediction;
 import jakarta.persistence.EntityManager;
@@ -10,7 +10,6 @@ import org.springframework.stereotype.Repository;
 public class PastTravelCostPredictionRepository {
 
     private final EntityManager em;
-
 
     public void save(PastTravelCostPrediction prediction) {
         if (prediction.getPredictionID() == null) {

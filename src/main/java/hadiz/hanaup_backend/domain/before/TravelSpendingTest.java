@@ -2,11 +2,14 @@ package hadiz.hanaup_backend.domain.before;
 
 import hadiz.hanaup_backend.domain.User;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "travel_spending_test")
+@Getter @Setter
 public class TravelSpendingTest {
 
     @Id
