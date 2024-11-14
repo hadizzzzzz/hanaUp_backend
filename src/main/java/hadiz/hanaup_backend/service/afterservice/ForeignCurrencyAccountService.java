@@ -65,4 +65,8 @@ public class ForeignCurrencyAccountService {
 
         return BigDecimal.valueOf(account.getFirstBalance()).add(interest); // 원금 + 이자 반환
     }
+
+    public ForeignCurrencyAccount findOne(Long memberId){
+        return foreignCurrencyAccountRepository.findByUserId(memberId);
+    }
 }

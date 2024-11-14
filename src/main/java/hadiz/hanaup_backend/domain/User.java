@@ -22,6 +22,7 @@ public class User {
 
     private String email;
     private String name;
+    private String travelState; // 여행 상태 "before", "during", "after"
 
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)

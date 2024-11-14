@@ -23,6 +23,7 @@ public class ForeignCurrencyAccount {
     private boolean isActive; // 계좌 활성 상태
 
     private String currencyID;
+    private String country;
     private Double firstBalance;
     private BigDecimal interest;
     private BigDecimal lastBalance;

@@ -7,14 +7,17 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 @SpringBootApplication
 @EntityScan(basePackages = "hadiz.hanaup_backend.domain")
 public class HanaUpBackendApplication {
 
-	@PostConstruct
+	/*@PostConstruct
 	public void init(){
 		System.setProperty("https.protocols", "TLSv1.2");
-	}
+	}*/
 	public static void main(String[] args) {
 		SpringApplication.run(HanaUpBackendApplication.class, args);
 	}

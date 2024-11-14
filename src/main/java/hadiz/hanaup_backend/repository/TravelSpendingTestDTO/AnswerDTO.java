@@ -10,4 +10,7 @@ public class AnswerDTO {
     private String answerText;
     private int score;
     private String indicator;
+
+    public AnswerDTO() {
+    }
 }

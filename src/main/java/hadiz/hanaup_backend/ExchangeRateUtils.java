@@ -17,7 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 // 지원되는 통화 리스트
-// 환테크 : 일본, 태국, 말레이시아, 대만(42.2), 홍콩
+// 환테크 : 일본, 태국, 말레이시아, 대만(42.2), 호주
 // 적금 : 미국, 영국, 중국, 필리핀(23.7), 유럽
 public class ExchangeRateUtils {
 
@@ -57,6 +57,7 @@ public class ExchangeRateUtils {
         supportedCurrencies.put("THB", "태국 바트");
         supportedCurrencies.put("MYR", "말레이시아 링기트");
         supportedCurrencies.put("HKD", "홍콩 달러");
+        supportedCurrencies.put("AUD", "호주 달러");
         return supportedCurrencies;
     }
 
@@ -91,7 +92,9 @@ public class ExchangeRateUtils {
                     if (getSupportedCurrencies().containsKey(currencyCode)) {
                         try {
                             BigDecimal rate = parseRate(exchangeRateInfo);
-                            exchangeRates.put(currencyCode, rate);
+                            // 소수점 둘째 자리로 제한
+                            BigDecimal roundedRate = rate.setScale(2, BigDecimal.ROUND_HALF_UP);
+                            exchangeRates.put(currencyCode, roundedRate);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -166,7 +169,9 @@ public class ExchangeRateUtils {
                             if (getSupportedCurrencies().containsKey(currencyCode)) {
                                 try {
                                     BigDecimal rate = parseRate(exchangeRateInfo);
-                                    exchangeRatesForWeek.put(currencyCode + "_" + formattedDate, rate); // 날짜와 함께 저장
+                                    // 소수점 둘째 자리로 제한
+                                    BigDecimal roundedRate = rate.setScale(2, BigDecimal.ROUND_HALF_UP);
+                                    exchangeRatesForWeek.put(currencyCode + "_" + formattedDate, roundedRate); // 날짜와 함께 저장
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
@@ -190,4 +195,3 @@ public class ExchangeRateUtils {
         return weeklyExchangeRates;
     }
 }
-
