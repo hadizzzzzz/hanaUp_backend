@@ -26,10 +26,6 @@ public class User {
 
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<TravelLog> travelLogs = new ArrayList<>();
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<TravelSpendingTest> spendingTests = new ArrayList<>();
 
     @JsonIgnore

@@ -23,6 +23,5 @@ public class HanaMoneyByCurrency {
     @JoinColumn(name = "user_id")
     private User user;
 
-    // Getters and Setters
 }
 

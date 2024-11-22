@@ -1,15 +1,11 @@
 package hadiz.hanaup_backend.api;
 
 import hadiz.hanaup_backend.domain.HanaMoneyByCurrency;
-import hadiz.hanaup_backend.domain.TravelLog;
 import hadiz.hanaup_backend.domain.User;
 import hadiz.hanaup_backend.domain.after.ForeignCurrencyAccount;
 import hadiz.hanaup_backend.repository.HanaMoneyByCurrencyRepository;
-import hadiz.hanaup_backend.repository.TravelLogRepository;
-import hadiz.hanaup_backend.repository.UserRepository;
 import hadiz.hanaup_backend.service.UserService;
 import hadiz.hanaup_backend.service.afterservice.ForeignCurrencyAccountService;
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -39,8 +35,6 @@ public class mainApiController {
     @Autowired
     private HanaMoneyByCurrencyRepository hanaMoneyByCurrencyRepository;
 
-    @Autowired
-    private TravelLogRepository travelLogRepository;
 
     @GetMapping("/travel-status")
     public TravelStatusResponse travelStatus(@RequestParam(value = "id", required = false) Long id) {
@@ -53,29 +47,23 @@ public class mainApiController {
             user.setTravelState("before");
 
             // 기본 여행 정보 생성 (일본)
-            TravelLog japan = new TravelLog();
-            japan.setUser(user);
-            japan.setDestination("Japan");
-            japan.setDuration(3);
+
             // japan.setTotalspent
             HanaMoneyByCurrency japanTravel = new HanaMoneyByCurrency();
             japanTravel.setUser(user);
             japanTravel.setCountry("Japan");
             japanTravel.setCurrencyID("JPY");
-            japanTravel.setBalance(10000.0); // 기본 잔액 예시값 설정
+            japanTravel.setBalance(5548.10); // 기본 잔액 예시값 설정 (엔화 / 5만원)
             hanaMoneyByCurrencyRepository.saveCustom(japanTravel);
 
             // 기본 여행 정보 생성 (미국)
-            TravelLog usa = new TravelLog();
-            usa.setUser(user);
-            usa.setDestination("USA");
-            usa.setDuration(3);
+
             // usa.setTotalspent
             HanaMoneyByCurrency usaTravel = new HanaMoneyByCurrency();
             usaTravel.setUser(user);
             usaTravel.setCountry("USA");
             usaTravel.setCurrencyID("USD");
-            usaTravel.setBalance(5000.0); // 기본 잔액 예시값 설정
+            usaTravel.setBalance(71.86); // 기본 잔액 예시값 설정 (달러 / 10만원)
             hanaMoneyByCurrencyRepository.saveCustom(usaTravel);
         } else {
             // 기존 유저 조회 로직
@@ -100,8 +88,8 @@ public class mainApiController {
         LocalDate today = LocalDate.now();
         String formattedDate = today.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
-        // 10일 전 날짜
-        LocalDate tenDaysAgo = today.minusDays(10);
+        // 1일 전 날짜
+        LocalDate tenDaysAgo = today.minusDays(1);
         String formattedDateTenDaysAgo = tenDaysAgo.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
         Map<String, BigDecimal> nowRates = getExchangeRates(formattedDate);
@@ -111,8 +99,21 @@ public class mainApiController {
         List<FundInfoResponse.CountryFund> countryFunds = hanaMoneyByCurrencyRepository.findAllByUser(user)
                 .stream()
                 .map(hanaMoney -> {
-                    BigDecimal nowRate = nowRates.get(hanaMoney.getCurrencyID());
-                    BigDecimal beforeRate = beforeRates.get(hanaMoney.getCurrencyID());
+                    BigDecimal nowRate;
+                    BigDecimal beforeRate;
+
+                    // 문자열 비교에서 .equals() 사용
+                    if ("TWD".equals(hanaMoney.getCurrencyID())) {
+                        nowRate = BigDecimal.valueOf(42.2);
+                        beforeRate = BigDecimal.valueOf(42.2);
+                    } else if ("PHP".equals(hanaMoney.getCurrencyID())) {
+                        nowRate = BigDecimal.valueOf(23.7);
+                        beforeRate = BigDecimal.valueOf(23.7);
+                    } else {
+                        nowRate = nowRates.get(hanaMoney.getCurrencyID());
+                        beforeRate = beforeRates.get(hanaMoney.getCurrencyID());
+                    }
+
                     String trend;
 
                     // nowRate와 beforeRate 비교하여 trend 결정

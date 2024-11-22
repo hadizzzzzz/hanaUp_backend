@@ -1,17 +1,18 @@
 spring:
   datasource:
-    url: jdbc:h2:tcp://localhost/~/hadiz
-    username: doeun
-    password:
-    driver-class-name: org.h2.Driver
+      url: jdbc:mysql://127.0.0.1:3306/hanaup?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true
+      username: root
+      password: ejkimysjong35!
+      driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         show_sql: false
         format_sql: false
+        dialect: org.hibernate.dialect.MySQLDialect
 
 logging.level:
   org.hibernate.SQL: debug
@@ -19,12 +20,7 @@ logging.level:
 
 server:
   port: 8081
-  ssl: # ssl 설정 임시 - 자체서명된 ssl 인증서_추후 도메인파면 lets encrypt로 변경
-    enabled: true
-    key-store-type: PKCS12
-    key-store: "C:/Users/gram/Desktop/하디즈/hanaUp_backend/ssl_local/keystore.p12"
-    key-store-password: hanaup
-    key-alias: server
-    enabled-protocols: TLSv1.2,TLSv1.3
+
+
 
 

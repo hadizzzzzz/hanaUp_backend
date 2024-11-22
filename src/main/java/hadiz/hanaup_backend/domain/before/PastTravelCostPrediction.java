@@ -1,6 +1,5 @@
 package hadiz.hanaup_backend.domain.before;
 
-import hadiz.hanaup_backend.domain.TravelLog;
 import hadiz.hanaup_backend.domain.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -17,18 +16,12 @@ public class PastTravelCostPrediction {
 
     private String country;
     private int travelDuration;
-    private String travelType;
     private double predictedAmount;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "travel_log_id")
-    private TravelLog travelLog;
-
-    // Getters and Setters
 }
 
 

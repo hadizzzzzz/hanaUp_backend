@@ -17,8 +17,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 // 지원되는 통화 리스트
-// 환테크 : 일본, 태국, 말레이시아, 대만(42.2), 호주
-// 적금 : 미국, 영국, 중국, 필리핀(23.7), 유럽
+// 환테크 : 일본, 태국, 말레이시아, 대만(42.2), 중국
+// 적금 : 미국, 영국, 호주, 필리핀(23.7), 유럽
 public class ExchangeRateUtils {
 
     private static final BigDecimal DEFAULT_EXCHANGE_RATE = BigDecimal.valueOf(1300);
@@ -49,14 +49,17 @@ public class ExchangeRateUtils {
 
     public static Map<String, String> getSupportedCurrencies() {
         Map<String, String> supportedCurrencies = new HashMap<>();
+
+        // 환테크 + 대만(42.2)
         supportedCurrencies.put("JPY(100)", "일본 옌");
+        supportedCurrencies.put("THB", "태국 바트");
+        supportedCurrencies.put("MYR", "말레이시아 링기트");
         supportedCurrencies.put("CNH", "위안화");
+
+        // 적금 + 필리핀(23.7)
         supportedCurrencies.put("USD", "미국 달러");
         supportedCurrencies.put("EUR", "유로");
         supportedCurrencies.put("GBP", "영국 파운드");
-        supportedCurrencies.put("THB", "태국 바트");
-        supportedCurrencies.put("MYR", "말레이시아 링기트");
-        supportedCurrencies.put("HKD", "홍콩 달러");
         supportedCurrencies.put("AUD", "호주 달러");
         return supportedCurrencies;
     }

@@ -18,7 +18,6 @@ public class ForeignCurrencyAccount {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long accountID;
 
-    private LocalDate expirationDate = LocalDate.of(2024, 12, 31);
     private int period;
     private boolean isActive; // 계좌 활성 상태
 
@@ -36,6 +35,6 @@ public class ForeignCurrencyAccount {
     @JoinColumn(name = "hana_money_id", nullable = false)
     private HanaMoneyByCurrency hanaMoney;  // 하나머니 ID (Foreign Key)
 
-    // '미국'은 객체를 하나 미리 생성해서 박아두기
+
 }
 

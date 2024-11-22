@@ -27,18 +27,20 @@ public class ForeignCurrencyAccountService {
 
     // 저축 계좌 생성
     @Transactional
-    public void createAccount(String currencyId, Long userId, double depositAmount, int savingPeriod) {
+    public ForeignCurrencyAccount createAccount(Long userId, double depositAmount, int savingPeriod) {
 
         ForeignCurrencyAccount account = new ForeignCurrencyAccount();
         User user = new User();
         user.setUserID(userId);
         account.setAccountID(userId);
-        account.setCurrencyID(currencyId);
+        // account.setCurrencyID(currencyId);
         account.setPeriod(savingPeriod);
         account.setFirstBalance(depositAmount);
         account.setActive(true);
         account.setUser(user);
         foreignCurrencyAccountRepository.save(account);
+
+        return account;
     }
 
     // 계좌 해지 시 이자 및 원금 계산

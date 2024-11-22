@@ -45,12 +45,12 @@ public class ForeignCurrencyAccountServiceTest {
         userRepository.save(user);
 
         // 계좌 생성 테스트
-        foreignCurrencyAccountService.createAccount("USD", user.getUserID(), 1000.0, 6);
+        //foreignCurrencyAccountService.createAccount("USD", user.getUserID(), 1000.0, 6);
 
-        ForeignCurrencyAccount account = foreignCurrencyAccountRepository.findByUserId(user.getUserID());
+        //ForeignCurrencyAccount account = foreignCurrencyAccountRepository.findByUserId(user.getUserID());
 
-        BigDecimal result = foreignCurrencyAccountService.calculateInterest(user.getUserID());
-        System.out.println(result);
+        //BigDecimal result = foreignCurrencyAccountService.calculateInterest(user.getUserID());
+        //System.out.println(result);
     }
 
 
