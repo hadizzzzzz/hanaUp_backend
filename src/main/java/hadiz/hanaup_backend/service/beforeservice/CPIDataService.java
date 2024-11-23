@@ -16,15 +16,31 @@ public class CPIDataService {
      */
     public Double getCpiForCountry(String country) {
         // 국가별 CPI 수치 설정
-        switch (country.toLowerCase()) {
-            case "korea":
-            case "한국":
-                return 90.0;
-            case "usa":
-            case "미국":
-                return 250.0;
+        switch (country) {
+            case "Korea":
+                return 71.8;
+            case "USA":
+                return 100.0;
+            case "Japan":
+                return 53.4;
+            case "Thailand":
+                return 66.4;
+            case "Malaysia":
+                return 48.3;
+            case "China":
+                return 60.9;
+            case "Taiwan":
+                return 41.9;
+            case "UK":
+                return 100.4;
+            case "Australia":
+                return 89.1;
+            case "Philippines":
+                return 50.3;
+            case "Europe":
+                return 103.1;
             default:
-                return 100.0; // 기본 CPI 수치 (알 수 없는 국가일 경우)
+                return 71.8; // 기본값 (한국)
         }
     }
 }

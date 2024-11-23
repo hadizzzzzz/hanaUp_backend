@@ -1,11 +1,8 @@
 package hadiz.hanaup_backend.api;
 
 import hadiz.hanaup_backend.domain.HanaMoneyByCurrency;
-import hadiz.hanaup_backend.domain.TravelLog;
 import hadiz.hanaup_backend.domain.User;
 import hadiz.hanaup_backend.repository.TravelSpendingTestDTO.AnswerDTO;
-import hadiz.hanaup_backend.service.HanaMoneyByCurrencyService;
-import hadiz.hanaup_backend.service.TravelLogService;
 import hadiz.hanaup_backend.service.UserService;
 import hadiz.hanaup_backend.service.beforeservice.PastTravelCostService;
 import hadiz.hanaup_backend.service.beforeservice.TravelSpendingTestService;
@@ -63,11 +60,9 @@ public class beforeApiController {
         // 입력된 answers를 기반으로 결과 유형을 계산함
         String resultType = travelSpendingTestService.calculateMbti(answers);
 
-        TravelLog travelLog = new TravelLog();
 
-        // 예상 비용 계산 Long userId, Long travelLogId, String country, int duration
+        // 예상 비용 계산 String country, int duration 원화 반환
         double estimatedCost = pastTravelCostService.predictTravelCost(
-                Long.parseLong(request.getUserId()), travelLog.getLogID(),
                 request.getDestination(), Integer.parseInt(request.getDuration()));
 
         int estimatedCostInt = (int) estimatedCost;
@@ -79,15 +74,15 @@ public class beforeApiController {
 
         User user = userService.findOne(Long.parseLong(request.userId));
 
-        travelLog.setUser(user);
-        travelLog.setDuration(Integer.parseInt(request.duration));
-        travelLog.setDestination(request.destination);
-
         HanaMoneyByCurrency hanaMoneyByCurrency  = new HanaMoneyByCurrency();
         hanaMoneyByCurrency.setUser(user);
         hanaMoneyByCurrency.setCurrencyID(request.currency);
         hanaMoneyByCurrency.setCountry(request.destination);
+
+
         hanaMoneyByCurrency.setBalance(estimatedCost);
+
+
 
         //여행 상태 변경
         user.setTravelState("during");
@@ -125,11 +120,6 @@ public class beforeApiController {
 
         User user = userService.findOne(Long.parseLong(request.userId));
 
-        TravelLog travelLog = new TravelLog();
-
-        travelLog.setUser(user);
-        travelLog.setDuration(Integer.parseInt(request.duration));
-        travelLog.setDestination(request.destination);
 
         HanaMoneyByCurrency hanaMoneyByCurrency  = new HanaMoneyByCurrency();
         hanaMoneyByCurrency.setUser(user);
@@ -137,20 +127,22 @@ public class beforeApiController {
         hanaMoneyByCurrency.setCountry(request.destination);
 
 
+
         //여행 상태 변경
         user.setTravelState("during");
 
+        // 원화로 반환
         double estimatedCost = pastTravelCostService.predictTravelCost(
-                Long.parseLong(request.getUserId()), travelLog.getLogID(),
                 request.getDestination(), Integer.parseInt(request.getDuration()));
 
         int estimatedCostInt = (int) estimatedCost;
-        hanaMoneyByCurrency.setBalance(estimatedCost);
 
         // 응답 생성
         TravelCostResponse response = new TravelCostResponse();
         response.setEstimatedCost(estimatedCostInt);
-        response.setCurrency(request.getCurrency()); // 고정된 통화 예시. 필요시 요청에 맞게 변환 가능
+        response.setCurrency(request.getCurrency());
+
+        hanaMoneyByCurrency.setBalance(estimatedCost);
 
         return ResponseEntity.ok(response);
     }

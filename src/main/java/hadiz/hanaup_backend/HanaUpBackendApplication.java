@@ -14,10 +14,7 @@ import java.net.UnknownHostException;
 @EntityScan(basePackages = "hadiz.hanaup_backend.domain")
 public class HanaUpBackendApplication {
 
-	/*@PostConstruct
-	public void init(){
-		System.setProperty("https.protocols", "TLSv1.2");
-	}*/
+
 	public static void main(String[] args) {
 		SpringApplication.run(HanaUpBackendApplication.class, args);
 	}

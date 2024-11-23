@@ -20,6 +20,14 @@ public class HanaMoneyByCurrencyRepository {
                 .getResultList();
     }
 
+    // 유저별로 찾은 목록에 더해서, 나라로 특정 하나머니 검색
+    public HanaMoneyByCurrency findHanaMoneyByCountry(List<HanaMoneyByCurrency> hanaMoneyList, String country) {
+        return hanaMoneyList.stream()
+                .filter(h -> country.equals(h.getCountry()))
+                .findFirst() // 첫 번째 매칭되는 요소를 반환
+                .orElse(null); // 매칭되는 요소가 없을 경우 null 반환
+    }
+
     public void saveCustom(HanaMoneyByCurrency hanaMoneyByCurrency) {
         if (hanaMoneyByCurrency.getHanaMoneyID() == null) {
             em.persist(hanaMoneyByCurrency);

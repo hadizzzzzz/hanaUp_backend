@@ -1,15 +1,11 @@
 package hadiz.hanaup_backend.service.beforeservice;
 
-import hadiz.hanaup_backend.domain.TravelLog;
 import hadiz.hanaup_backend.domain.before.PastTravelCostPrediction;
 import hadiz.hanaup_backend.repository.before.PastTravelCostPredictionRepository;
-import hadiz.hanaup_backend.repository.TravelLogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @Transactional
@@ -18,25 +14,22 @@ public class PastTravelCostService {
 
     @Autowired
     private final PastTravelCostPredictionRepository pastTravelCostPredictionRepository;
-    @Autowired
-    private final TravelLogRepository travelLogRepository;
+
     @Autowired
     private final CPIDataService cpiDataService; // CPI 데이터를 가져오는 서비스 가정
 
     /**
      * 과거 결제 데이터를 기반으로 여행 경비를 예측하는 메서드
-     * @param userId 사용자 ID
-     * @param travelLogId 여행 로그 ID
      * @return 예상 여행 경비
      */
     @Transactional
-    public double predictTravelCost(Long userId, Long travelLogId, String country, int duration) {
+    public double predictTravelCost(String country, int duration) {
 
         PastTravelCostPrediction prediction = new PastTravelCostPrediction();
         prediction.setCountry(country);
 
         // 사용자의 과거 여행 로그를 가져옴
-        List<TravelLog> travelLogs = findLog(userId);
+        /*List<TravelLog> travelLogs = findLog(userId);
 
         TravelLog foundTravelLog = null;
         for (TravelLog t : travelLogs) {
@@ -44,18 +37,18 @@ public class PastTravelCostService {
                 foundTravelLog = t;  // 원하는 travelLogId에 해당하는 TravelLog를 찾음
                 break;  // 찾았으므로 루프 종료
             }
-        }
+        }*/
 
 
         // 여행 국가와 여행 기간 등의 정보를 기반으로 CPI 데이터를 가져옴
-        Double pastcpi = cpiDataService.getCpiForCountry(foundTravelLog.getDestination());
+        Double pastcpi = cpiDataService.getCpiForCountry("korea");
         Double futurecpi = cpiDataService.getCpiForCountry(prediction.getCountry());
 
         Double cpiFactor = futurecpi / pastcpi;
         System.out.println("cpiFactor = " + cpiFactor);
 
         // 과거 여행 비용 데이터 (일)
-        Double pastExpenses = foundTravelLog.getTotalSpent() / foundTravelLog.getDuration();
+        Double pastExpenses = 223984.0; // 한국 여행에 하루 22만 3984원 소비
         System.out.println("pastExpenses = " + pastExpenses);
 
 
@@ -70,10 +63,6 @@ public class PastTravelCostService {
         return predictedCost;
     }
 
-
-    public List<TravelLog> findLog(Long memberId){
-        return travelLogRepository.findByUserId(memberId);
-    }
 
 
 }

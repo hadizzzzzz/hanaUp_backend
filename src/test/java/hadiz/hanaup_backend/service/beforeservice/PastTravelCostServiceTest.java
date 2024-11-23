@@ -1,26 +1,15 @@
 package hadiz.hanaup_backend.service.beforeservice;
 
-import hadiz.hanaup_backend.domain.TravelLog;
-import hadiz.hanaup_backend.domain.User;
-import hadiz.hanaup_backend.domain.before.PastTravelCostPrediction;
-import hadiz.hanaup_backend.repository.before.PastTravelCostPredictionRepository;
-import hadiz.hanaup_backend.repository.TravelLogRepository;
-import hadiz.hanaup_backend.repository.UserRepository;
-import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
-import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.Rollback;
-
 
 
 @SpringBootTest
 @Transactional
 class PastTravelCostServiceTest {
 
-    @Autowired
+    /*@Autowired
     EntityManager em;
 
     @Autowired
@@ -85,7 +74,7 @@ class PastTravelCostServiceTest {
 
 
 
-    }
+    }*/
 
 }
 

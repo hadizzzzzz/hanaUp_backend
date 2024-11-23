@@ -24,8 +24,6 @@ public class ForexTech {
     @JoinColumn(name = "hana_money_id", nullable = false)
     private HanaMoneyByCurrency hanaMoney;  // 하나머니 ID (Foreign Key)
 
-    private Double targetExchangeRate;  // 목표 환율
-    private Double currentExchangeRate;  // 현재 환율
 
     private String currencyID;
     private Double Balance;

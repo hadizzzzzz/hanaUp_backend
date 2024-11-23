@@ -1,15 +1,10 @@
 package hadiz.hanaup_backend.repository.after;
 
-import hadiz.hanaup_backend.domain.TravelLog;
 import hadiz.hanaup_backend.domain.after.ForeignCurrencyAccount;
-import hadiz.hanaup_backend.domain.before.PastTravelCostPrediction;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
