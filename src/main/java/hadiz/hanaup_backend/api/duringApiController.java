@@ -1,9 +1,7 @@
 package hadiz.hanaup_backend.api;
 
 import hadiz.hanaup_backend.domain.DailyExpenseReport;
-import hadiz.hanaup_backend.domain.HanaMoneyByCurrency;
 import hadiz.hanaup_backend.domain.User;
-import hadiz.hanaup_backend.repository.HanaMoneyByCurrencyRepository;
 import hadiz.hanaup_backend.service.UserService;
 import hadiz.hanaup_backend.service.beforeservice.DailyExpenseReportService;
 import lombok.AllArgsConstructor;
@@ -11,10 +9,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,16 +30,17 @@ public class duringApiController {
 
 
     @GetMapping("/daily-report")
+    @CrossOrigin(origins = "https:/hanaup.vercel.app")
+    @Transactional
     public List<DailyReportResponse> getDailyReport(
-            @RequestParam("userId") String userId,
-            @RequestParam("country") String country) {
+            @RequestBody DailyReportRequest request) {
 
         List<DailyReportResponse> responses = new ArrayList<>();
 
         // 1일차부터 3일차까지 데이터 가져오기
         for (int day = 1; day <= 3; day++) {
             // db에서 각 일차에 대한 데일리 리포트 가져오기
-            DailyExpenseReport report = dailyExpenseReportService.getAllByCountryAndDay(country, day);
+            DailyExpenseReport report = dailyExpenseReportService.getAllByCountryAndDay(request.country, day);
 
             // 응답 객체 생성
             DailyReportResponse response = new DailyReportResponse();
@@ -61,7 +58,7 @@ public class duringApiController {
             response.setBreakdown(breakdown);
 
             // 수수료 0.0175
-            int fee = (int) (report.getTotalSpent() * 0.0175);
+            int fee = (int) (report.getTotalSpent_won() * 0.0175);
             response.setFeeSavings(fee);
 
 
@@ -73,15 +70,16 @@ public class duringApiController {
     }
 
     @GetMapping("/final-report")
-    public DailyReportResponse getFinalReport(
-            @RequestParam("userId") String userId,
-            @RequestParam("country") String country) {
+    @CrossOrigin(origins = "https:/hanaup.vercel.app")
+    @Transactional
+    public FinalReportResponse getFinalReport(
+            @RequestBody DailyReportRequest request) {
 
-        // 데일리 리포트는 항상 3일차를 가져옴
-        DailyReportResponse response = new DailyReportResponse();
+
+        FinalReportResponse response = new FinalReportResponse();
 
         // db에 저장된 레포트 가져오기
-        DailyExpenseReport report = dailyExpenseReportService.getAllByCountryAndDay(country, 4);
+        DailyExpenseReport report = dailyExpenseReportService.getAllByCountryAndDay(request.country, 4);
 
         // 총액 설정
         response.setTotalSpent(report.getTotalSpent());
@@ -97,28 +95,38 @@ public class duringApiController {
         response.setBreakdown(breakdown);
 
         // 수수료 0.0175
-        int fee = (int) (report.getTotalSpent() * 0.0175);
+        int fee = (int) (report.getTotalSpent_won() * 0.0175);
         response.setFeeSavings(fee);
 
-        User user = userService.findOne(Long.parseLong(userId));
+        User user = userService.findOne(Long.parseLong(request.userId));
         user.setTravelState("after");
-
-        // 선택 국가 내용 자금 정보에 넣는 코드
-        HanaMoneyByCurrency hanaMoneyByCurrency = new HanaMoneyByCurrency();
-        hanaMoneyByCurrency.setBalance((double) report.getTotalSpent());
-        hanaMoneyByCurrency.setUser(user);
-        hanaMoneyByCurrency.setCountry(report.getCountry());
 
 
         return response;
 
     }
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class DailyReportRequest {
+        private String userId;
+        private String country;
+    }
 
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public class DailyReportResponse {
+    public static class DailyReportResponse {
         private int day;
+        private int totalSpent;
+        private Map<String, Integer> breakdown;
+        private int feeSavings;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class FinalReportResponse {
         private int totalSpent;
         private Map<String, Integer> breakdown;
         private int feeSavings;

@@ -26,12 +26,7 @@ public class DailyExpenseReport {
     private int activityExpense;
 
     private int totalSpent;
-    private int savedFees;
-
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+    private int totalSpent_won;
 
 
 }

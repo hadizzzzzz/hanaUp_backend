@@ -10,7 +10,7 @@ import static hadiz.hanaup_backend.ExchangeRateUtils.getWeeklyExchangeRates;
 public class ExchangeRateTest {
 
     public static void main(String[] args) throws Exception {
-        Map<String, BigDecimal> exchangeRates = ExchangeRateUtils.getExchangeRates("20241107");
+        Map<String, BigDecimal> exchangeRates = ExchangeRateUtils.getExchangeRates("20241123");
         Map<String, String> supportedCurrencies = ExchangeRateUtils.getSupportedCurrencies();
 
         //해당 날짜 환율 정보

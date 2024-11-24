@@ -20,13 +20,7 @@ public class ForexTech {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;  // 사용자 ID (Foreign Key)
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "hana_money_id", nullable = false)
-    private HanaMoneyByCurrency hanaMoney;  // 하나머니 ID (Foreign Key)
-
-
     private String currencyID;
     private Double Balance;
 
-    private boolean isActive; // 계좌 활성 상태
 }

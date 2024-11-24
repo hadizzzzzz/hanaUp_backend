@@ -3,16 +3,15 @@ package hadiz.hanaup_backend.api;
 import hadiz.hanaup_backend.domain.HanaMoneyByCurrency;
 import hadiz.hanaup_backend.domain.User;
 import hadiz.hanaup_backend.repository.TravelSpendingTestDTO.AnswerDTO;
+import hadiz.hanaup_backend.service.HanaMoneyByCurrencyService;
 import hadiz.hanaup_backend.service.UserService;
 import hadiz.hanaup_backend.service.beforeservice.PastTravelCostService;
 import hadiz.hanaup_backend.service.beforeservice.TravelSpendingTestService;
 import lombok.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,8 +31,13 @@ public class beforeApiController {
     @Autowired
     private final UserService userService;
 
+    @Autowired
+    private final HanaMoneyByCurrencyService hanaMoneyByCurrencyService;
+
 
     @PostMapping("/type-test")
+    @CrossOrigin(origins = "https:/hanaup.vercel.app")
+    @Transactional
     public ResponseEntity<TypeTestResponse> handleTypeTest(@RequestBody TypeTestRequest request) {
 
         List<AnswerDTO> answers = new ArrayList<>();
@@ -82,6 +86,8 @@ public class beforeApiController {
 
         hanaMoneyByCurrency.setBalance(estimatedCost);
 
+        hanaMoneyByCurrencyService.saveOrUpdateHanaMoney(hanaMoneyByCurrency);
+
 
 
         //여행 상태 변경
@@ -93,7 +99,7 @@ public class beforeApiController {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public class TypeTestRequest {
+    public static class TypeTestRequest {
         private String userId;
         private String destination;
         private String currency;
@@ -106,7 +112,7 @@ public class beforeApiController {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public class TypeTestResponse {
+    public static class TypeTestResponse {
         private String resultType;
         private int estimatedCost;
         private String currency;
@@ -116,6 +122,8 @@ public class beforeApiController {
 
 
     @PostMapping("/estimate-cost")
+    @CrossOrigin(origins = "https:/hanaup.vercel.app")
+    @Transactional
     public ResponseEntity<TravelCostResponse> estimateTravelCost(@RequestBody TravelCostRequest request) {
 
         User user = userService.findOne(Long.parseLong(request.userId));
@@ -144,13 +152,15 @@ public class beforeApiController {
 
         hanaMoneyByCurrency.setBalance(estimatedCost);
 
+        hanaMoneyByCurrencyService.saveOrUpdateHanaMoney(hanaMoneyByCurrency);
+
         return ResponseEntity.ok(response);
     }
 
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public class TravelCostRequest {
+    public static class TravelCostRequest {
         private String userId;
         private String destination;
         private String currency;
@@ -160,7 +170,7 @@ public class beforeApiController {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public class TravelCostResponse {
+    public static class TravelCostResponse {
         private int estimatedCost;
         private String currency;
     }

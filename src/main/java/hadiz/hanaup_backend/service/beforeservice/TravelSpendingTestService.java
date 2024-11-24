@@ -1,6 +1,5 @@
 package hadiz.hanaup_backend.service.beforeservice;
 
-import hadiz.hanaup_backend.domain.before.TravelSpendingTest;
 import hadiz.hanaup_backend.repository.TravelSpendingTestDTO.AnswerDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,7 +14,6 @@ public class TravelSpendingTestService {
 
     @Transactional
     public String calculateMbti(List<AnswerDTO> answers) {
-        TravelSpendingTest test = new TravelSpendingTest();
 
         int eScore = 0, iScore = 0;
         int fScore = 0, tScore = 0;
@@ -52,20 +50,3 @@ public class TravelSpendingTestService {
         return mbtiResult.toString();
     }
 }
-
-
-
-//controller 예시
-/*@RestController
-@RequestMapping("/api/mbti")
-public class MbtiController {
-
-    @Autowired
-    private MbtiService mbtiService; //서비스
-
-    @PostMapping("/result")
-    public ResponseEntity<String> getMbtiResult(@RequestBody List<AnswerDTO> answers) {
-        String mbtiResult = mbtiService.calculateMbti(answers);
-        return ResponseEntity.ok(mbtiResult);
-    }
-}*/

@@ -19,7 +19,7 @@ public class HanaMoneyByCurrency {
     private String country;
     private Double balance;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "user_id")
     private User user;
 
