@@ -27,7 +27,6 @@ public class ForexTechService {
         forexTech.setUser(user);
 
         forexTech.setBalance(depositAmount);
-        forexTech.setActive(true);
 
         forexTechRepository.save(forexTech);
     }

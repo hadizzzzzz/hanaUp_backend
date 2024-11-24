@@ -1,5 +1,6 @@
 package hadiz.hanaup_backend.repository.after;
 
+import hadiz.hanaup_backend.domain.HanaMoneyByCurrency;
 import hadiz.hanaup_backend.domain.after.ForeignCurrencyAccount;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -31,5 +32,10 @@ public class ForeignCurrencyAccountRepository {
         }
     }
 
+    public void delete(ForeignCurrencyAccount foreignCurrencyAccount) {
+        if (foreignCurrencyAccount != null) {
+            em.remove(foreignCurrencyAccount);
+        }
+    }
 
 }

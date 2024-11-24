@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -37,28 +38,26 @@ public class mainApiController {
 
 
     @GetMapping("/travel-status")
-    public TravelStatusResponse travelStatus(@RequestParam(value = "id", required = false) Long id) {
+    @CrossOrigin(origins = "https:/hanaup.vercel.app")
+    @Transactional
+    public TravelStatusResponse travelStatus(@RequestParam(value = "userId", required = false) Long userId) {
         User user;
 
-        if (id == null) {
+        if (userId == null) {
             // 새로운 유저 생성 로직
             user = new User();
-            Long newId = userService.join(user); // 새로운 유저 생성 및 가입
             user.setTravelState("before");
+            userService.saveUserWithExpiration(user);
 
             // 기본 여행 정보 생성 (일본)
-
-            // japan.setTotalspent
             HanaMoneyByCurrency japanTravel = new HanaMoneyByCurrency();
             japanTravel.setUser(user);
             japanTravel.setCountry("Japan");
-            japanTravel.setCurrencyID("JPY");
+            japanTravel.setCurrencyID("JPY(100)");
             japanTravel.setBalance(5548.10); // 기본 잔액 예시값 설정 (엔화 / 5만원)
             hanaMoneyByCurrencyRepository.saveCustom(japanTravel);
 
             // 기본 여행 정보 생성 (미국)
-
-            // usa.setTotalspent
             HanaMoneyByCurrency usaTravel = new HanaMoneyByCurrency();
             usaTravel.setUser(user);
             usaTravel.setCountry("USA");
@@ -67,8 +66,12 @@ public class mainApiController {
             hanaMoneyByCurrencyRepository.saveCustom(usaTravel);
         } else {
             // 기존 유저 조회 로직
-            user = userService.findOne(id);
+            user = userService.findOne(userId);
+            if (user == null) {
+                throw new IllegalArgumentException("User not found for ID: " + userId);
+            }
         }
+        // userId와 user의 ID를 반환하도록 수정
         return new TravelStatusResponse(user.getTravelState(), String.valueOf(user.getUserID()));
     }
 
@@ -79,8 +82,10 @@ public class mainApiController {
         private String uid;
     }
 
-    @GetMapping("/fund-info/{id}")
-    public FundInfoResponse FundInfo(@PathVariable("id") Long id) {
+    @GetMapping("/fund-info")
+    @CrossOrigin(origins = "https:/hanaup.vercel.app")
+    @Transactional
+    public FundInfoResponse FundInfo(@RequestParam("userId") Long id) {
         // 유저 정보 조회
         User user = userService.findOne(id);
 

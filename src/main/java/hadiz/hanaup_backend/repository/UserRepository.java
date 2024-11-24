@@ -22,4 +22,15 @@ public class UserRepository {
     public User findById(Long userId) {
         return em.find(User.class, userId);
     }
+
+    public void deleteById(Long id) {
+        User user = em.find(User.class, id);
+        if (user != null) {
+            em.remove(user);
+        }
+    }
+
+    public void deleteAll() {
+        em.createQuery("DELETE FROM User").executeUpdate();
+    }
 }

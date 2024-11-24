@@ -131,13 +131,18 @@ public class ExchangeRateUtils {
     // 2024년 11월부터 현재까지 1주 간격으로 월화수목금 환율 가져오기
     public static Map<String, Map<String, BigDecimal>> getWeeklyExchangeRates() {
         Map<String, Map<String, BigDecimal>> weeklyExchangeRates = new LinkedHashMap<>();
-        Calendar startDate = new GregorianCalendar(2024, Calendar.NOVEMBER, 1);
+        Calendar startDate = new GregorianCalendar(2024, Calendar.NOVEMBER, 4);
         Calendar endDate = Calendar.getInstance();  // 현재 날짜
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
 
         // 시작 날짜를 월요일로 설정
-        while (startDate.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
-            startDate.add(Calendar.DAY_OF_YEAR, 1);
+        if (startDate.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
+            // (일요일은 1, 월요일은 2... 토요일은 7)
+            int diff = Calendar.MONDAY - startDate.get(Calendar.DAY_OF_WEEK);
+            if (diff < 0) {
+                diff += 7; // 이전 주 월요일로 이동
+            }
+            startDate.add(Calendar.DAY_OF_YEAR, diff);
         }
 
         HttpClient client = HttpClient.newBuilder().build();
@@ -193,6 +198,9 @@ public class ExchangeRateUtils {
 
             // 주별 환율 저장 (월요일 날짜를 키로 사용)
             weeklyExchangeRates.put(weekStartDate, exchangeRatesForWeek);
+
+            // 다음 주 월요일로 이동
+            startDate.add(Calendar.DAY_OF_YEAR, 2); // 금요일에서 다음 주 월요일까지 이동
         }
 
         return weeklyExchangeRates;

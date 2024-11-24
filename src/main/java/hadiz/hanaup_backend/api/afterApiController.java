@@ -6,6 +6,7 @@ import hadiz.hanaup_backend.domain.HanaMoneyByCurrency;
 import hadiz.hanaup_backend.domain.User;
 import hadiz.hanaup_backend.domain.after.ForeignCurrencyAccount;
 import hadiz.hanaup_backend.repository.HanaMoneyByCurrencyRepository;
+import hadiz.hanaup_backend.service.HanaMoneyByCurrencyService;
 import hadiz.hanaup_backend.service.UserService;
 import hadiz.hanaup_backend.service.afterservice.ForeignCurrencyAccountService;
 import hadiz.hanaup_backend.service.afterservice.ForexTechService;
@@ -14,6 +15,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -38,7 +40,10 @@ public class afterApiController {
     private final ForeignCurrencyAccountService foreignCurrencyAccountService;
 
 
+
     @GetMapping("/investment-info")
+    @CrossOrigin(origins = "https:/hanaup.vercel.app")
+    @Transactional
     public InvestmentResponse getInvestmentInfo(
             @RequestParam("userId") String userId,
             @RequestParam("country") String country) {
@@ -50,34 +55,34 @@ public class afterApiController {
 
         // 여행 후에 남은 금액으로 변경
         double remainCost = 0;
-        if (country == "Thailand"){
+        if (country.equals("Thailand")){
             remainCost = 1242.54;
         }
-        if (country == "Malaysia"){
+        if (country.equals("Malaysia")){
             remainCost = 321.19;
         }
-        if (country == "China"){
+        if (country.equals("China")){
             remainCost = 519.91;
         }
-        if (country == "Taiwan"){
+        if (country.equals("Taiwan")){
             remainCost = 1165.23;
         }
-        if (country == "UK"){
+        if (country.equals("UK")){
             remainCost = 56.7;
         }
-        if (country == "Australia"){
+        if (country.equals("Australia")){
             remainCost = 110.38;
         }
-        if (country == "Philippines"){
+        if (country.equals("Philippines")){
             remainCost = 2107.04;
         }
-        if (country == "Europe"){
+        if (country.equals("Europe")){
             remainCost = 67.88;
         }
-        if (country == "USA"){
+        if (country.equals("USA")){
             remainCost = 71.86;
         }
-        if (country == "Japan"){
+        if (country.equals("Japan")){
             remainCost = 5548.1;
         }
 
@@ -90,34 +95,34 @@ public class afterApiController {
         response.setCountry(country);
 
         // 금리 설정 (국가에 따라 일본 금리와 한국 금리 구분)
-        if (country == "Thailand") {
+        if (country.equals("Thailand")) {
             response.setInterestRate(2.5);
         }
-        if (country == "Malaysia"){
+        if (country.equals("Malaysia")){
             response.setInterestRate(3);
         }
-        if (country == "China"){
+        if (country.equals("China")){
             response.setInterestRate(3.1);
         }
-        if (country == "Taiwan"){
+        if (country.equals("Taiwan")){
             response.setInterestRate(2);
         }
-        if (country == "UK"){
+        if (country.equals("UK")){
             response.setInterestRate(5);
         }
-        if (country == "Australia"){
+        if (country.equals("Australia")){
             response.setInterestRate(4.35);
         }
-        if (country == "Philippines"){
+        if (country.equals("Philippines")){
             response.setInterestRate(6.25);
         }
-        if (country == "Europe"){
+        if (country.equals("Europe")){
             response.setInterestRate(3.4);
         }
-        if (country == "USA"){
+        if (country.equals("USA")){
             response.setInterestRate(5);
         }
-        if (country == "Japan"){
+        if (country.equals("Japan")){
             response.setInterestRate(0.25);
         }
 
@@ -137,7 +142,7 @@ public class afterApiController {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public class InvestmentResponse {
+    public static class InvestmentResponse {
         private double balance;
         private String country;
         private double interestRate;
@@ -146,6 +151,8 @@ public class afterApiController {
 
 
     @GetMapping("/exchange-rate")
+    @CrossOrigin(origins = "https:/hanaup.vercel.app")
+    @Transactional
     public ExchangeRateResponse getExchangeRate(
             @RequestParam("userId") String userId,
             @RequestParam("country") String country) {
@@ -231,12 +238,14 @@ public class afterApiController {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public class ExchangeRateResponse {
+    public static class ExchangeRateResponse {
         private double todayExchangeRate;
         private Map<String, Map<String, Double>> weeklyExchangeRates;
     }
 
     @PostMapping("/forextech")
+    @CrossOrigin(origins = "https:/hanaup.vercel.app")
+    @Transactional
     public ForexTechResponse handleForexTech(@RequestBody ForexTechRequest request) {
 
 
@@ -262,7 +271,7 @@ public class afterApiController {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public class ForexTechRequest {
+    public static class ForexTechRequest {
         private String userId;
         private String country;
         private double amount;
@@ -271,12 +280,14 @@ public class afterApiController {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public class ForexTechResponse {
+    public static class ForexTechResponse {
         private String country;
         private double totalAmount;
     }
 
     @GetMapping("/interest-rate")
+    @CrossOrigin(origins = "https:/hanaup.vercel.app")
+    @Transactional
     public InterestRateResponse getInterestRate(
             @RequestParam("userId") String userId,
             @RequestParam("country") String country) {
@@ -321,7 +332,7 @@ public class afterApiController {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public class InterestRateResponse {
+    public static class InterestRateResponse {
         private String country;
 
         @JsonProperty("1개월")
@@ -335,22 +346,24 @@ public class afterApiController {
     }
 
     @PostMapping("/makesavings")
+    @CrossOrigin(origins = "https:/hanaup.vercel.app")
+    @Transactional
     public MakeSavingsResponse makeSavings(@RequestBody MakeSavingsRequest request) {
 
         ForeignCurrencyAccount account = foreignCurrencyAccountService.createAccount(Long.valueOf(request.userId), request.amount, request.month);
-        BigDecimal finalAmount = foreignCurrencyAccountService.calculateInterest(Long.valueOf(request.userId));
 
         // 예시 원금 및 이자율 설정
         double originalAmount = account.getFirstBalance();
-        BigDecimal interestAmount = account.getInterest();
 
 
         // 응답 생성
         MakeSavingsResponse response = new MakeSavingsResponse();
         response.setCountry(request.getCountry());
         response.setOriginalAmount(originalAmount);
-        response.setInterestAmount(interestAmount);
-        response.setFinalAmount(finalAmount);
+
+        List<HanaMoneyByCurrency> allByUser = hanaMoneyByCurrencyRepository.findAllByUser(userService.findOne(Long.valueOf(request.userId)));
+        HanaMoneyByCurrency hanamoney = hanaMoneyByCurrencyRepository.findHanaMoneyByCountry(allByUser, request.country);
+        hanaMoneyByCurrencyRepository.delete(hanamoney);
 
         return response;
     }
@@ -358,7 +371,7 @@ public class afterApiController {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public class MakeSavingsRequest {
+    public static class MakeSavingsRequest {
         private String userId;
         private String country;
         private double amount;
@@ -368,14 +381,16 @@ public class afterApiController {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public class MakeSavingsResponse {
+    public static class MakeSavingsResponse {
         private String country;
         private double originalAmount;
-        private BigDecimal interestAmount;
-        private BigDecimal finalAmount;
+//        private BigDecimal interestAmount;
+//        private BigDecimal finalAmount;
     }
 
     @PostMapping("/deletesavings")
+    @CrossOrigin(origins = "https:/hanaup.vercel.app")
+    @Transactional
     public DeleteSavingsResponse deleteSavings(@RequestBody DeleteSavingsRequest request) {
 
         ForeignCurrencyAccount account = foreignCurrencyAccountService.findOne(Long.valueOf(request.userId));
@@ -389,13 +404,15 @@ public class afterApiController {
         response.setInterestAmount(interestAmount);
         response.setFinalAmount(finalAmount);
 
+        foreignCurrencyAccountService.delete(account);
+
         return response;
     }
 
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public class DeleteSavingsRequest {
+    public static class DeleteSavingsRequest {
         private String userId;
         private String country;
     }
@@ -403,7 +420,7 @@ public class afterApiController {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public class DeleteSavingsResponse {
+    public static class DeleteSavingsResponse {
         private String country;
         private BigDecimal interestAmount;
         private BigDecimal finalAmount;
