@@ -318,9 +318,8 @@ public class afterApiController {
     @Transactional
     public MakeSavingsResponse makeSavings(@RequestBody MakeSavingsRequest request) {
 
-        ForeignCurrencyAccount account = foreignCurrencyAccountService.createAccount(Long.valueOf(request.userId), request.amount, request.month);
-        account.setCountry(request.getCountry());
-        account.setCurrencyID(getCurrencyCodeForCountry(request.country));
+        String currency = getCurrencyCodeForCountry(request.country);
+        ForeignCurrencyAccount account = foreignCurrencyAccountService.createAccount(Long.valueOf(request.userId), request.amount, request.month, request.country, currency);
 
 
         // 예시 원금 및 이자율 설정

@@ -22,7 +22,7 @@ public class ForeignCurrencyAccountService {
 
     // 저축 계좌 생성
     @Transactional
-    public ForeignCurrencyAccount createAccount(Long userId, double depositAmount, int savingPeriod) {
+    public ForeignCurrencyAccount createAccount(Long userId, double depositAmount, int savingPeriod, String country, String currency) {
 
         ForeignCurrencyAccount account = new ForeignCurrencyAccount();
         User user = new User();
@@ -30,6 +30,9 @@ public class ForeignCurrencyAccountService {
         account.setAccountID(userId);
         account.setPeriod(savingPeriod);
         account.setFirstBalance(depositAmount);
+        account.setCountry(country);
+        account.setCurrencyID(currency);
+
         account.setUser(user);
         foreignCurrencyAccountRepository.save(account);
 
