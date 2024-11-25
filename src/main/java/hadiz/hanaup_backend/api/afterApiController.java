@@ -325,7 +325,7 @@ public class afterApiController {
 
         // 예시 원금 및 이자율 설정
         double originalAmount = account.getFirstBalance();
-        BigDecimal finalAmount = foreignCurrencyAccountService.calculateInterest(Long.valueOf(request.userId));
+        BigDecimal finalAmount = foreignCurrencyAccountService.calculateInterest(Long.valueOf(request.userId), request.country);
 
         // 응답 생성
         MakeSavingsResponse response = new MakeSavingsResponse();
