@@ -3,7 +3,8 @@ package hadiz.hanaup_backend.api;
 import hadiz.hanaup_backend.domain.HanaMoneyByCurrency;
 import hadiz.hanaup_backend.domain.User;
 import hadiz.hanaup_backend.domain.after.ForeignCurrencyAccount;
-import hadiz.hanaup_backend.repository.HanaMoneyByCurrencyRepository;
+import hadiz.hanaup_backend.service.ExchangeRateService;
+import hadiz.hanaup_backend.service.HanaMoneyByCurrencyService;
 import hadiz.hanaup_backend.service.UserService;
 import hadiz.hanaup_backend.service.afterservice.ForeignCurrencyAccountService;
 import lombok.AllArgsConstructor;
@@ -15,14 +16,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
-import static hadiz.hanaup_backend.ExchangeRateUtils.getExchangeRates;
 
 @RestController
+@CrossOrigin(origins = {"https://hanaup.vercel.app", "http://localhost:5173"})
 @RequiredArgsConstructor
 @RequestMapping("/api/main")
 public class mainApiController {
@@ -34,11 +33,13 @@ public class mainApiController {
     private final ForeignCurrencyAccountService foreignCurrencyAccountService;
 
     @Autowired
-    private HanaMoneyByCurrencyRepository hanaMoneyByCurrencyRepository;
+    private HanaMoneyByCurrencyService hanaMoneyByCurrencyService;
+
+    @Autowired
+    private ExchangeRateService exchangeRateService;
 
 
     @GetMapping("/travel-status")
-    @CrossOrigin(origins = "https:/hanaup.vercel.app")
     @Transactional
     public TravelStatusResponse travelStatus(@RequestParam(value = "userId", required = false) Long userId) {
         User user;
@@ -53,9 +54,9 @@ public class mainApiController {
             HanaMoneyByCurrency japanTravel = new HanaMoneyByCurrency();
             japanTravel.setUser(user);
             japanTravel.setCountry("Japan");
-            japanTravel.setCurrencyID("JPY(100)");
+            japanTravel.setCurrencyID("JPY");
             japanTravel.setBalance(5548.10); // 기본 잔액 예시값 설정 (엔화 / 5만원)
-            hanaMoneyByCurrencyRepository.saveCustom(japanTravel);
+            hanaMoneyByCurrencyService.saveOrUpdateHanaMoney(japanTravel);
 
             // 기본 여행 정보 생성 (미국)
             HanaMoneyByCurrency usaTravel = new HanaMoneyByCurrency();
@@ -63,7 +64,7 @@ public class mainApiController {
             usaTravel.setCountry("USA");
             usaTravel.setCurrencyID("USD");
             usaTravel.setBalance(71.86); // 기본 잔액 예시값 설정 (달러 / 10만원)
-            hanaMoneyByCurrencyRepository.saveCustom(usaTravel);
+            hanaMoneyByCurrencyService.saveOrUpdateHanaMoney(usaTravel);
         } else {
             // 기존 유저 조회 로직
             user = userService.findOne(userId);
@@ -83,47 +84,41 @@ public class mainApiController {
     }
 
     @GetMapping("/fund-info")
-    @CrossOrigin(origins = "https:/hanaup.vercel.app")
     @Transactional
-    public FundInfoResponse FundInfo(@RequestParam("userId") Long id) {
+    public FundInfoResponse FundInfo(@RequestParam("userId") Long id) throws Exception {
         // 유저 정보 조회
         User user = userService.findOne(id);
 
-        // 오늘 날짜
+        // 오늘 날짜와 1일 전 날짜
         LocalDate today = LocalDate.now();
-        String formattedDate = today.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        LocalDate oneDaysAgo = today.minusDays(1);
 
-        // 1일 전 날짜
-        LocalDate tenDaysAgo = today.minusDays(1);
-        String formattedDateTenDaysAgo = tenDaysAgo.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        // 환율 정보 가져오기
+        List<ExchangeRateService.ExchangeRateDto> todayRates = exchangeRateService.getExchangeRatesForDate(today);
+        List<ExchangeRateService.ExchangeRateDto> beforeRates = exchangeRateService.getExchangeRatesForDate(oneDaysAgo);
 
-        Map<String, BigDecimal> nowRates = getExchangeRates(formattedDate);
-        Map<String, BigDecimal> beforeRates = getExchangeRates(formattedDateTenDaysAgo);
-
-        // DB에서 모든 CountryFund 조회
-        List<FundInfoResponse.CountryFund> countryFunds = hanaMoneyByCurrencyRepository.findAllByUser(user)
+        // DB에서 유저의 모든 CountryFund 조회 및 매핑
+        List<FundInfoResponse.CountryFund> countryFunds = hanaMoneyByCurrencyService.getAllHanaMoneyByUser(user)
                 .stream()
                 .map(hanaMoney -> {
-                    BigDecimal nowRate;
-                    BigDecimal beforeRate;
+                    String currencyID = hanaMoney.getCurrencyID();
 
-                    // 문자열 비교에서 .equals() 사용
-                    if ("TWD".equals(hanaMoney.getCurrencyID())) {
-                        nowRate = BigDecimal.valueOf(42.2);
-                        beforeRate = BigDecimal.valueOf(42.2);
-                    } else if ("PHP".equals(hanaMoney.getCurrencyID())) {
-                        nowRate = BigDecimal.valueOf(23.7);
-                        beforeRate = BigDecimal.valueOf(23.7);
-                    } else {
-                        nowRate = nowRates.get(hanaMoney.getCurrencyID());
-                        beforeRate = beforeRates.get(hanaMoney.getCurrencyID());
-                    }
+                    // 오늘의 환율 찾기
+                    ExchangeRateService.ExchangeRateDto nowRate = todayRates.stream()
+                            .filter(rate -> rate.getCurrCD().equalsIgnoreCase(currencyID))
+                            .findFirst()
+                            .orElse(null);
 
+                    // 어제의 환율 찾기
+                    ExchangeRateService.ExchangeRateDto beforeRate = beforeRates.stream()
+                            .filter(rate -> rate.getCurrCD().equalsIgnoreCase(currencyID))
+                            .findFirst()
+                            .orElse(null);
+
+                    // 환율 트렌드 결정
                     String trend;
-
-                    // nowRate와 beforeRate 비교하여 trend 결정
                     if (nowRate != null && beforeRate != null) {
-                        if (nowRate.compareTo(beforeRate) >= 0) {
+                        if (Double.compare(nowRate.getBasicRate(), beforeRate.getBasicRate()) >= 0) {
                             trend = "up";
                         } else {
                             trend = "down";
@@ -132,11 +127,16 @@ public class mainApiController {
                         trend = "up"; // null 값이 있을 경우 기본값 설정
                     }
 
+                    // CountryFund 객체 반환
                     return new FundInfoResponse.CountryFund(
                             hanaMoney.getCountry(),
                             hanaMoney.getCurrencyID(),
                             hanaMoney.getBalance(),
-                            new FundInfoResponse.ExchangeRate(nowRate, beforeRate, trend)
+                            new FundInfoResponse.ExchangeRate(
+                                    nowRate != null ? BigDecimal.valueOf(nowRate.getBasicRate()) : null,
+                                    beforeRate != null ? BigDecimal.valueOf(beforeRate.getBasicRate()) : null,
+                                    trend
+                            )
                     );
                 })
                 .collect(Collectors.toList());
@@ -154,6 +154,7 @@ public class mainApiController {
 
         return new FundInfoResponse(countryFunds);
     }
+
 
     @Data
     @AllArgsConstructor
@@ -193,6 +194,20 @@ public class mainApiController {
         public FundInfoResponse(List<CountryFund> countryFunds) {
             this.countryFunds = countryFunds;
         }
+    }
+
+    @DeleteMapping("/delete-user")
+    @Transactional
+    public String deleteUser(@RequestParam("userId") Long userId) {
+        User user = userService.findOne(userId);
+        if (user == null) {
+            throw new IllegalArgumentException("User not found for ID: " + userId);
+        }
+
+        // 사용자 삭제
+        userService.deleteUser(userId);
+
+        return "User and associated data deleted successfully.";
     }
 
 

@@ -25,10 +25,6 @@ public class User {
 
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PastTravelCostPrediction> pastPredictions = new ArrayList<>();
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ForeignCurrencyAccount> foreignCurrencyAccounts = new ArrayList<>();
 
     @JsonIgnore

@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@CrossOrigin(origins = {"https://hanaup.vercel.app", "http://localhost:5173"})
 @RequiredArgsConstructor
 @RequestMapping("/api/during-travel")
 public class duringApiController {
@@ -30,17 +31,17 @@ public class duringApiController {
 
 
     @GetMapping("/daily-report")
-    @CrossOrigin(origins = "https:/hanaup.vercel.app")
     @Transactional
     public List<DailyReportResponse> getDailyReport(
-            @RequestBody DailyReportRequest request) {
+            @RequestParam("userId") String userId,
+            @RequestParam("country") String country) {
 
         List<DailyReportResponse> responses = new ArrayList<>();
 
         // 1일차부터 3일차까지 데이터 가져오기
         for (int day = 1; day <= 3; day++) {
             // db에서 각 일차에 대한 데일리 리포트 가져오기
-            DailyExpenseReport report = dailyExpenseReportService.getAllByCountryAndDay(request.country, day);
+            DailyExpenseReport report = dailyExpenseReportService.getAllByCountryAndDay(country, day);
 
             // 응답 객체 생성
             DailyReportResponse response = new DailyReportResponse();
@@ -70,16 +71,16 @@ public class duringApiController {
     }
 
     @GetMapping("/final-report")
-    @CrossOrigin(origins = "https:/hanaup.vercel.app")
     @Transactional
     public FinalReportResponse getFinalReport(
-            @RequestBody DailyReportRequest request) {
+            @RequestParam("userId") String userId,
+            @RequestParam("country") String country) {
 
 
         FinalReportResponse response = new FinalReportResponse();
 
         // db에 저장된 레포트 가져오기
-        DailyExpenseReport report = dailyExpenseReportService.getAllByCountryAndDay(request.country, 4);
+        DailyExpenseReport report = dailyExpenseReportService.getAllByCountryAndDay(country, 4);
 
         // 총액 설정
         response.setTotalSpent(report.getTotalSpent());
@@ -98,19 +99,12 @@ public class duringApiController {
         int fee = (int) (report.getTotalSpent_won() * 0.0175);
         response.setFeeSavings(fee);
 
-        User user = userService.findOne(Long.parseLong(request.userId));
+        User user = userService.findOne(Long.parseLong(userId));
         user.setTravelState("after");
 
 
         return response;
 
-    }
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class DailyReportRequest {
-        private String userId;
-        private String country;
     }
 
     @Data

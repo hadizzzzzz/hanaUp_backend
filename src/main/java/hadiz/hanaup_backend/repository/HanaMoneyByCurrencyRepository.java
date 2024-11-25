@@ -15,7 +15,6 @@ public class HanaMoneyByCurrencyRepository {
 
     private final EntityManager em;
 
-    @Transactional
     public List<HanaMoneyByCurrency> findAllByUser(User user) {
         return em.createQuery("SELECT h FROM HanaMoneyByCurrency h WHERE h.user = :user", HanaMoneyByCurrency.class)
                 .setParameter("user", user)
@@ -23,7 +22,6 @@ public class HanaMoneyByCurrencyRepository {
     }
 
     // 유저별로 찾은 목록에 더해서, 나라로 특정 하나머니 검색
-    @Transactional
     public HanaMoneyByCurrency findHanaMoneyByCountry(List<HanaMoneyByCurrency> hanaMoneyList, String country) {
         return hanaMoneyList.stream()
                 .filter(h -> country.equals(h.getCountry()))
@@ -31,7 +29,7 @@ public class HanaMoneyByCurrencyRepository {
                 .orElse(null); // 매칭되는 요소가 없을 경우 null 반환
     }
 
-    @Transactional
+
     public void saveCustom(HanaMoneyByCurrency hanaMoneyByCurrency) {
         if (hanaMoneyByCurrency.getHanaMoneyID() == null) {
             em.persist(hanaMoneyByCurrency);
@@ -40,7 +38,7 @@ public class HanaMoneyByCurrencyRepository {
         }
     }
 
-    @Transactional
+
     public void delete(HanaMoneyByCurrency hanaMoneyByCurrency) {
         if (hanaMoneyByCurrency != null) {
             em.remove(hanaMoneyByCurrency);
