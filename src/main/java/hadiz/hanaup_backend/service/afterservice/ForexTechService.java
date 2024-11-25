@@ -18,7 +18,7 @@ public class ForexTechService {
     private final ForexTechRepository forexTechRepository;
 
     @Transactional
-    public void createForexTech(Long userId, double depositAmount) {
+    public ForexTech createForexTech(Long userId, double depositAmount) {
 
         ForexTech forexTech = new ForexTech();
 
@@ -29,13 +29,12 @@ public class ForexTechService {
         forexTech.setBalance(depositAmount);
 
         forexTechRepository.save(forexTech);
+
+        return forexTech;
     }
 
     @Transactional
-    public double autoRecharge(Long userId, double amount){
-
-        // 1. 기존 사용자 ForexTech 정보를 가져오기
-        ForexTech forexTech = forexTechRepository.findByUserId(userId);
+    public double autoRecharge(ForexTech forexTech, double amount){
 
 
         // 3. 기존 balance와 합산 (기존 하나머니 잔액 만큼 충전)

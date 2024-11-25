@@ -1,7 +1,5 @@
 package hadiz.hanaup_backend.service.beforeservice;
 
-import hadiz.hanaup_backend.domain.before.PastTravelCostPrediction;
-import hadiz.hanaup_backend.repository.before.PastTravelCostPredictionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,9 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class PastTravelCostService {
 
     @Autowired
-    private final PastTravelCostPredictionRepository pastTravelCostPredictionRepository;
-
-    @Autowired
     private final CPIDataService cpiDataService; // CPI 데이터를 가져오는 서비스 가정
 
     /**
@@ -25,24 +20,10 @@ public class PastTravelCostService {
     @Transactional
     public double predictTravelCost(String country, int duration) {
 
-        PastTravelCostPrediction prediction = new PastTravelCostPrediction();
-        prediction.setCountry(country);
-
-        // 사용자의 과거 여행 로그를 가져옴
-        /*List<TravelLog> travelLogs = findLog(userId);
-
-        TravelLog foundTravelLog = null;
-        for (TravelLog t : travelLogs) {
-            if (t.getLogID().equals(travelLogId)) {
-                foundTravelLog = t;  // 원하는 travelLogId에 해당하는 TravelLog를 찾음
-                break;  // 찾았으므로 루프 종료
-            }
-        }*/
-
 
         // 여행 국가와 여행 기간 등의 정보를 기반으로 CPI 데이터를 가져옴
         Double pastcpi = cpiDataService.getCpiForCountry("korea");
-        Double futurecpi = cpiDataService.getCpiForCountry(prediction.getCountry());
+        Double futurecpi = cpiDataService.getCpiForCountry(country);
 
         Double cpiFactor = futurecpi / pastcpi;
         System.out.println("cpiFactor = " + cpiFactor);
@@ -56,9 +37,6 @@ public class PastTravelCostService {
         double predictedCost = pastExpenses * cpiFactor * duration;
         System.out.println("predictedCost = " + predictedCost);
 
-        // 예측 금액을 저장
-        prediction.setPredictedAmount(predictedCost);
-        pastTravelCostPredictionRepository.save(prediction);
 
         return predictedCost;
     }

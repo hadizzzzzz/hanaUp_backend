@@ -3,6 +3,7 @@ package hadiz.hanaup_backend.api;
 import hadiz.hanaup_backend.domain.HanaMoneyByCurrency;
 import hadiz.hanaup_backend.domain.User;
 import hadiz.hanaup_backend.repository.TravelSpendingTestDTO.AnswerDTO;
+import hadiz.hanaup_backend.service.ExchangeRateService;
 import hadiz.hanaup_backend.service.HanaMoneyByCurrencyService;
 import hadiz.hanaup_backend.service.UserService;
 import hadiz.hanaup_backend.service.beforeservice.PastTravelCostService;
@@ -13,11 +14,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 @RestController
+@CrossOrigin(origins = {"https://hanaup.vercel.app", "http://localhost:5173"})
 @RequestMapping("/api/before-travel")
 @RequiredArgsConstructor
 public class beforeApiController {
@@ -34,11 +37,13 @@ public class beforeApiController {
     @Autowired
     private final HanaMoneyByCurrencyService hanaMoneyByCurrencyService;
 
+    @Autowired
+    private final ExchangeRateService exchangeRateService;
+
 
     @PostMapping("/type-test")
-    @CrossOrigin(origins = "https:/hanaup.vercel.app")
     @Transactional
-    public ResponseEntity<TypeTestResponse> handleTypeTest(@RequestBody TypeTestRequest request) {
+    public ResponseEntity<TypeTestResponse> handleTypeTest(@RequestBody TypeTestRequest request) throws Exception {
 
         List<AnswerDTO> answers = new ArrayList<>();
 
@@ -83,8 +88,19 @@ public class beforeApiController {
         hanaMoneyByCurrency.setCurrencyID(request.currency);
         hanaMoneyByCurrency.setCountry(request.destination);
 
+        // 환율 찾기
+        LocalDate today = LocalDate.now();
+        List<ExchangeRateService.ExchangeRateDto> todayRates = exchangeRateService.getExchangeRatesForDate(today);
 
-        hanaMoneyByCurrency.setBalance(estimatedCost);
+        ExchangeRateService.ExchangeRateDto nowRate = todayRates.stream()
+                .filter(rate -> rate.getCurrCD().equalsIgnoreCase(request.currency))
+                .findFirst()
+                .orElse(null);
+
+        double balance = estimatedCost / nowRate.getBasicRate();
+
+
+        hanaMoneyByCurrency.setBalance(balance);
 
         hanaMoneyByCurrencyService.saveOrUpdateHanaMoney(hanaMoneyByCurrency);
 
@@ -122,9 +138,8 @@ public class beforeApiController {
 
 
     @PostMapping("/estimate-cost")
-    @CrossOrigin(origins = "https:/hanaup.vercel.app")
     @Transactional
-    public ResponseEntity<TravelCostResponse> estimateTravelCost(@RequestBody TravelCostRequest request) {
+    public ResponseEntity<TravelCostResponse> estimateTravelCost(@RequestBody TravelCostRequest request) throws Exception {
 
         User user = userService.findOne(Long.parseLong(request.userId));
 
@@ -150,7 +165,19 @@ public class beforeApiController {
         response.setEstimatedCost(estimatedCostInt);
         response.setCurrency(request.getCurrency());
 
-        hanaMoneyByCurrency.setBalance(estimatedCost);
+
+        // 환율 찾기
+        LocalDate today = LocalDate.now();
+        List<ExchangeRateService.ExchangeRateDto> todayRates = exchangeRateService.getExchangeRatesForDate(today);
+
+        ExchangeRateService.ExchangeRateDto nowRate = todayRates.stream()
+                .filter(rate -> rate.getCurrCD().equalsIgnoreCase(request.currency))
+                .findFirst()
+                .orElse(null);
+
+        double balance = estimatedCost / nowRate.getBasicRate();
+
+        hanaMoneyByCurrency.setBalance(balance);
 
         hanaMoneyByCurrencyService.saveOrUpdateHanaMoney(hanaMoneyByCurrency);
 

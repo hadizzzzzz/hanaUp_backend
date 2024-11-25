@@ -1,4 +1,4 @@
-package hadiz.hanaup_backend;
+package hadiz.hanaup_backend.config;
 import hadiz.hanaup_backend.scheduler.RedisKeyExpirationListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -7,8 +7,10 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.PatternTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @Configuration
 public class RedisConfig {
@@ -29,11 +31,32 @@ public class RedisConfig {
         return template;
     }
 
+
+    /*@Bean
+    public RedisMessageListenerContainer redisMessageListenerContainer(RedisConnectionFactory redisConnectionFactory) {
+        RedisMessageListenerContainer redisMessageListenerContainer = new RedisMessageListenerContainer();
+        redisMessageListenerContainer.setConnectionFactory(redisConnectionFactory);
+        return redisMessageListenerContainer;
+    }
+*/
     @Bean
-    public RedisMessageListenerContainer redisMessageListenerContainer(RedisKeyExpirationListener listener) {
+    public RedisMessageListenerContainer redisMessageListenerContainer(RedisConnectionFactory redisConnectionFactory) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(redisConnectionFactory);
-        container.addMessageListener(listener, new PatternTopic("__keyevent@*__:expired"));
+
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(5);
+        executor.setMaxPoolSize(10);
+        executor.setQueueCapacity(100);
+        executor.initialize();
+
+        container.setTaskExecutor(executor);
         return container;
     }
-}
+
+    @Bean
+    public MessageListenerAdapter messageListenerAdapter(RedisKeyExpirationListener listener) {
+        return new MessageListenerAdapter(listener);
+    }
+
+    }
