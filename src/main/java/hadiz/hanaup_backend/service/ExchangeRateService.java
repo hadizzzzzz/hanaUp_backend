@@ -6,6 +6,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -35,7 +36,9 @@ public class ExchangeRateService {
             "USD", "JPY", "EUR", "THB", "AUD", "GBP", "MYR", "CNY", "TWD", "PHP"
     );
 
-    public static List<ExchangeRateDto> getExchangeRatesForDate(LocalDate date) throws Exception {
+
+    @Cacheable(value = "exchangeRates", key = "#date")
+    public List<ExchangeRateDto> getExchangeRatesForDate(LocalDate date) throws Exception {
         // 날짜 설정
         String tmpInpStrDt = date.toString(); // 입력 날짜를 yyyy-MM-dd 형식으로
         String formattedDate = date.format(DateTimeFormatter.ofPattern("yyyyMMdd")); // yyyyMMdd 형식으로 변환
@@ -84,17 +87,5 @@ public class ExchangeRateService {
         return text.isEmpty() ? 0.0 : Double.parseDouble(text);
     }
 
-
-    public static void main(String[] args) {
-        try {
-            List<ExchangeRateDto> rates = getExchangeRatesForDate(LocalDate.now());
-            rates.forEach(rate -> System.out.printf(
-                    "Date: %s, Currency: %s, Basic Rate: %.2f%n",
-                    rate.getBasicDate(), rate.getCurrCD(), rate.getBasicRate()
-            ));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }
 
