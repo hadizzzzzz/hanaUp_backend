@@ -3,6 +3,7 @@ package hadiz.hanaup_backend.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -20,7 +21,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().permitAll() // 모든 요청 허용
                 )
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())); // CORS 설정 적용
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정 적용
+                .requiresChannel(channel -> channel
+                        .anyRequest().requiresSecure() // HTTPS로 리디렉션
+                );
 
         return http.build();
     }

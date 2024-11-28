@@ -1,7 +1,9 @@
 package hadiz.hanaup_backend.api;
 
 import hadiz.hanaup_backend.domain.DailyExpenseReport;
+import hadiz.hanaup_backend.domain.HanaMoneyByCurrency;
 import hadiz.hanaup_backend.domain.User;
+import hadiz.hanaup_backend.service.HanaMoneyByCurrencyService;
 import hadiz.hanaup_backend.service.UserService;
 import hadiz.hanaup_backend.service.beforeservice.DailyExpenseReportService;
 import lombok.AllArgsConstructor;
@@ -28,6 +30,9 @@ public class duringApiController {
 
     @Autowired
     private final UserService userService;
+
+    @Autowired
+    private final HanaMoneyByCurrencyService hanaMoneyByCurrencyService;
 
 
     @GetMapping("/daily-report")
@@ -76,6 +81,43 @@ public class duringApiController {
             @RequestParam("userId") String userId,
             @RequestParam("country") String country) {
 
+        User user = userService.findOne(Long.parseLong(userId));
+        HanaMoneyByCurrency userpick = hanaMoneyByCurrencyService.getHanaMoneyByCountry(user, country);
+
+        // 여행 후에 남은 금액으로 변경
+        double remainCost = 0;
+        if (country.equals("Thailand")){
+            remainCost = 1242.54;
+        }
+        if (country.equals("Malaysia")){
+            remainCost = 321.19;
+        }
+        if (country.equals("China")){
+            remainCost = 519.91;
+        }
+        if (country.equals("Taiwan")){
+            remainCost = 1165.23;
+        }
+        if (country.equals("UK")){
+            remainCost = 56.7;
+        }
+        if (country.equals("Australia")){
+            remainCost = 110.38;
+        }
+        if (country.equals("Philippines")){
+            remainCost = 2107.04;
+        }
+        if (country.equals("Europe")){
+            remainCost = 67.88;
+        }
+        if (country.equals("USA")){
+            remainCost = 71.86;
+        }
+        if (country.equals("Japan")){
+            remainCost = 5548.1;
+        }
+
+        userpick.setBalance(remainCost);
 
         FinalReportResponse response = new FinalReportResponse();
 
@@ -99,7 +141,6 @@ public class duringApiController {
         int fee = (int) (report.getTotalSpent_won() * 0.0175);
         response.setFeeSavings(fee);
 
-        User user = userService.findOne(Long.parseLong(userId));
         user.setTravelState("after");
 
 

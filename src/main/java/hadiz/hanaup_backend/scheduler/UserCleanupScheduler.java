@@ -1,3 +1,4 @@
+/*
 package hadiz.hanaup_backend.scheduler;
 
 import hadiz.hanaup_backend.repository.UserRepository;
@@ -34,3 +35,4 @@ public class UserCleanupScheduler {
         }
     }
 }
+*/

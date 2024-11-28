@@ -74,7 +74,12 @@ public class ForeignCurrencyAccountService {
 
 
         account.setInterest(interest);
-        account.setLastBalance(BigDecimal.valueOf(account.getFirstBalance()).add(interest));
+
+        // 총금액 반환 (세금 계산)
+        BigDecimal exceptTaxInterest = interest.multiply(BigDecimal.valueOf(0.846));
+        BigDecimal lastBalance = BigDecimal.valueOf(account.getFirstBalance()).add(exceptTaxInterest);
+
+        account.setLastBalance(lastBalance);
 
         return BigDecimal.valueOf(account.getFirstBalance()).add(interest); // 원금 + 이자 반환
     }
