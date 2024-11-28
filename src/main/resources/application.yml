@@ -32,6 +32,11 @@ spring:
         queue-capacity: 100      # 작업 대기열 크기
       thread-name-prefix: "AsyncExecutor-" # 스레드 이름 접두사
 
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=1000,expireAfterAccess=300s
+
 logging:
   level:
     org.hibernate.SQL: debug    # Hibernate SQL 디버깅
