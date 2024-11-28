@@ -37,7 +37,12 @@ logging:
     org.hibernate.SQL: debug    # Hibernate SQL 디버깅
 
 server:
-  port: 8081                    # 서버 포트 설정
+  port: 443
+  ssl:
+    key-store: classpath:keystore.p12
+    key-store-password: hanaup
+    key-store-type: PKCS12
+    enabled: true
   tomcat:
     threads:
       max: 200                  # 최대 스레드 수

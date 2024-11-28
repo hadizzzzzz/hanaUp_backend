@@ -49,44 +49,9 @@ public class afterApiController {
             @RequestParam("userId") String userId,
             @RequestParam("country") String country) {
 
+
         User user = userService.findOne(Long.parseLong(userId));
         HanaMoneyByCurrency userpick = hanaMoneyByCurrencyService.getHanaMoneyByCountry(user, country);
-
-        // 여행 후에 남은 금액으로 변경
-        double remainCost = 0;
-        if (country.equals("Thailand")){
-            remainCost = 1242.54;
-        }
-        if (country.equals("Malaysia")){
-            remainCost = 321.19;
-        }
-        if (country.equals("China")){
-            remainCost = 519.91;
-        }
-        if (country.equals("Taiwan")){
-            remainCost = 1165.23;
-        }
-        if (country.equals("UK")){
-            remainCost = 56.7;
-        }
-        if (country.equals("Australia")){
-            remainCost = 110.38;
-        }
-        if (country.equals("Philippines")){
-            remainCost = 2107.04;
-        }
-        if (country.equals("Europe")){
-            remainCost = 67.88;
-        }
-        if (country.equals("USA")){
-            remainCost = 71.86;
-        }
-        if (country.equals("Japan")){
-            remainCost = 5548.1;
-        }
-
-        userpick.setBalance(remainCost);
-
 
         // 예시 데이터 설정
         InvestmentResponse response = new InvestmentResponse();

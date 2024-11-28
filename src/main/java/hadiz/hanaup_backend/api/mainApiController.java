@@ -48,7 +48,7 @@ public class mainApiController {
             // 새로운 유저 생성 로직
             user = new User();
             user.setTravelState("before");
-            userService.saveUserWithExpiration(user);
+            userService.join(user);
 
             // 기본 여행 정보 생성 (일본)
             HanaMoneyByCurrency japanTravel = new HanaMoneyByCurrency();
@@ -156,11 +156,14 @@ public class mainApiController {
     }
 
 
+
+
     @Data
     @AllArgsConstructor
     static class FundInfoResponse {
         private ForeignSavings foreignSavings;
         private List<CountryFund> countryFunds;
+        private double remainMoney;
 
         // CountryFund 정의
         @Data
@@ -190,10 +193,34 @@ public class mainApiController {
             private String currency;
         }
 
+
+        // remainMoney 계산 포함하는 생성자
+        public FundInfoResponse(ForeignSavings foreignSavings, List<CountryFund> countryFunds) {
+            this.foreignSavings = foreignSavings;
+            this.countryFunds = countryFunds;
+
+            // remainMoney 계산: exchangeRate * balance 합산 (1 단위 외화 기준 변환)
+            this.remainMoney = countryFunds.stream()
+                    .filter(fund -> fund.getExchangeRate().getRate() != null) // 유효한 환율만 포함
+                    .mapToDouble(fund -> {
+                        double rate = fund.getExchangeRate().getRate().doubleValue(); // 환율 가져오기
+                        String currency = fund.getCurrency(); // 통화 코드 가져오기
+
+                        // 특정 통화의 1 단위 기준 환율 계산
+                        if ("JPY".equals(currency)) {
+                            rate /= 100; // 일본 엔화는 100 단위 기준이므로 1 단위로 변경
+                        }
+                        // 다른 통화는 기본 1 단위 기준 환율 사용
+                        return fund.getBalance() * rate;
+                    })
+                    .sum();
+        }
+
         // CountryFunds만 초기화하는 생성자
         public FundInfoResponse(List<CountryFund> countryFunds) {
-            this.countryFunds = countryFunds;
+            this(null, countryFunds);
         }
+
     }
 
     @DeleteMapping("/delete-user")

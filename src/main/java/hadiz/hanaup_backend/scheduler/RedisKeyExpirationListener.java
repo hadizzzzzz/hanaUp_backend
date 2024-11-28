@@ -1,4 +1,4 @@
-package hadiz.hanaup_backend.scheduler;
+/*package hadiz.hanaup_backend.scheduler;
 
 import hadiz.hanaup_backend.repository.UserRepository;
 import hadiz.hanaup_backend.service.UserService;
@@ -20,21 +20,21 @@ public class RedisKeyExpirationListener extends KeyExpirationEventMessageListene
     @Autowired
     private UserService userService;
 
-    /**
+    *//**
      * RedisMessageListenerContainer를 사용하여 Redis 키 만료 이벤트 리스너 초기화
      *
      * @param listenerContainer Redis 메시지 리스너 컨테이너
-     */
+     *//*
     public RedisKeyExpirationListener(RedisMessageListenerContainer listenerContainer) {
         super(listenerContainer);
     }
 
-    /**
+    *//**
      * Redis key expired 이벤트 발생 시 호출됨
      *
      * @param message 만료된 key 정보
      * @param pattern 이벤트 패턴 (__keyevent@*__:expired)
-     */
+     *//*
     @Override
     @Transactional
     public void onMessage(Message message, byte[] pattern) {
@@ -52,5 +52,5 @@ public class RedisKeyExpirationListener extends KeyExpirationEventMessageListene
             }
         }
     }
-}
+}*/
 

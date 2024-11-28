@@ -1,4 +1,4 @@
-package hadiz.hanaup_backend.config;
+/*package hadiz.hanaup_backend.config;
 import hadiz.hanaup_backend.scheduler.RedisKeyExpirationListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -51,4 +51,4 @@ public class RedisConfig {
         return new MessageListenerAdapter(listener);
     }
 
-}
+}*/
